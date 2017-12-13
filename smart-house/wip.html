@@ -9,16 +9,16 @@
   <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
-<h1 id="intro">INTRO</h1>
+<h1>INTRO</h1>
 <p>The main goal of this specification is to provide <strong>expandable</strong> stack of hardware, software and protocols. This means that any future expansion should fit into the protocol, without breaking compatibility.</p>
-<h1 id="hardware">HARDWARE</h1>
-<h2 id="sensors-actuators">Sensors, actuators</h2>
+<h1>HARDWARE</h1>
+<h2>Sensors, actuators</h2>
 <p><strong>Sensors</strong> collect data from the environment. Each has its own unique 4 byte ID. See <a href="#function-layer">here</a> for ID value recommendations.</p>
 <p><strong>Actuators</strong> act upon the environment. Also each has its own unique 4 byte ID.</p>
 <p>IDs of actuators and sensors may overlap if both are the same physical device (eg a digital thermostat could both &quot;sense&quot; it's current setting and &quot;actuate&quot; a new displayed value). In those cases, both the sensor and the actuator must operate on same type of values. One physical device may have more than one ID (if it has multiple sensors/actuators).</p>
 <p>Both actuators and sensors are connected to <strong>controllers</strong> (eg Arduino, nodeMCU). For connection, B-cables must be used (see <a href="#bcables">here</a>).</p>
 <p>Other connections (electrical, Ethernet cables, etc) are out of scope of this document.</p>
-<h2 id="controllers">Controllers</h2>
+<h2>Controllers</h2>
 <p><strong>Controllers</strong> are microcontroller boards that interface with sensors and actuators. The boards must be Arduino-compatible and must have UART connection (for programming and configuration). Each controller has it's 2 byte unique ID.</p>
 <p>Boards must be mounted on <strong>mounting plates</strong> for their model. See <a href="#mounting-plates">mounting plates</a> for details.</p>
 <p>Boards are connected to the <strong>hub</strong> and communicate over one of:</p>
@@ -28,9 +28,10 @@
 <li>Serial (separate from the required UART connection)</li>
 </ul>
 <p>The communication protocol is defined <a href="#fumaprotocol">here</a>.</p>
-<div class='diff-del'>
-<h2 id="cabling">Cabling</h2>
-<h3 id="b-cables">B-cables</h3>
+<div class="diff-del">
+
+<h2>Cabling</h2>
+<h3>B-cables</h3>
 <p>Cables carrying power (5V), ground and variable number of signal lines. The lines are color coded as follows (with X being any color): ground is color X, power is X/white, signal lines are any other color except X and X/white. The interpretation MUST be unique.</p>
 <p>Cables are terminated with male 2.54mm header pins. The ordering of pins is following:</p>
 <ul>
@@ -41,13 +42,13 @@
 <p>If there are multiple signal pins, they must be a separate connector from power and ground pins.</p>
 <p>If power line is not required, it may be omitted (eg for LEDs).</p>
 <p>B<em>n</em> refers to the B-cable with <em>n</em> signal lines (eg. B2 caries power, ground and two signal cables)</p>
-<h3 id="serial-cables">Serial cables</h3>
+<h3>Serial cables</h3>
 <ul>
 <li>pin 0: recieve (colored X/white)</li>
 <li>pin 1: transmit (colored X)</li>
 </ul>
-<h2 id="mounting-plates">Mounting plates</h2>
-<h3 id="nodemcu-mounting-plate">NodeMCU mounting plate</h3>
+<h2>Mounting plates</h2>
+<h3>NodeMCU mounting plate</h3>
 <p><img src="https://imgur.com/jyJc57b.jpg" alt="schematic" /></p>
 <p><img src="https://imgur.com/7ids6f0.jpg" alt="pcb layout" /></p>
 <ul>
@@ -60,20 +61,23 @@
 <li>P7 - power input</li>
 </ul>
 </div>
-<h2 id="hub">Hub</h2>
+
+<h2>Hub</h2>
 <p><strong>Hub</strong> is the main logic unit of the system: it collects data from controllers and user input, and sends commands back to controllers. It connects to controllers through WiFi or Ethernet (LAN) and interfaces with user through a web interface.</p>
 <p>For software running on the hub, see <a href="#hub-software">here</a></p>
-<h1 id="software">SOFTWARE</h1>
-<h2 id="controller-software">Controller software</h2>
+<h1>SOFTWARE</h1>
+<h2>Controller software</h2>
 <p>Software on the controller has the following functionalities:</p>
 <ul>
-<li>Listens on the WiFi, Ethernet or serial connection for incoming commands (see <a href="#fumaprotocol">protocols</a>)</li>
+<li>Listens on the WiFi, Ethernet or serial connection for incoming commands (see <a href="#fumaprotocol">protocols</a>)
+<ul>
 <li>Responds to queries from the hub</li>
 <li>Periodically sends status to the hub (if configured to do so)</li>
+</ul></li>
 <li>Communicates with sensors</li>
 <li>Allows configuration and debugging over UART (see <a href="#adminprotocol">here</a>)</li>
 </ul>
-<h2 id="hub-software">Hub software</h2>
+<h2>Hub software</h2>
 <p>Software on the hub has the following functionalities:</p>
 <ul>
 <li>Manages controllers</li>
@@ -81,9 +85,9 @@
 <li>Takes actions based on rules defined via the API (see <a href="#api">API</a>)</li>
 <li>Provides a web interface for configuration, monitoring and user interaction</li>
 </ul>
-<h1 id="fuma-protocol">FuMa-PROTOCOL</h1>
+<h1>FuMa-PROTOCOL</h1>
 <p><strong>Function and Management protocol</strong> is used for communication between hub and the controllers. The protocol is divided into layers: <strong>function</strong>, <strong>management</strong> and <strong>transport</strong>.</p>
-<h2 id="function-layer">Function layer</h2>
+<h2>Function layer</h2>
 <p>Defines the commands hub sends to controllers</p>
 <p>The system can be configured in two ways:</p>
 <ul>
@@ -93,26 +97,44 @@
 <p>Only difference is in getting sensor readings.</p>
 <p>Each packet consists of the following fields:</p>
 <ul>
-<li><strong>ID</strong>: the 4 byte ID of the sensor/actuator. They are defined as a series of four one-byte values, NOT as a four-byte integer. For example: <code>00 01 00 02</code>. The IDs are not required to follow a specific order, but the following is recommended:</li>
+<li><p><strong>ID</strong>: the 4 byte ID of the sensor/actuator. They are defined as a series of four one-byte values, NOT as a four-byte integer. For example: <code>00 01 00 02</code>. The IDs are not required to follow a specific order, but the following is recommended:</p>
+<ul>
 <li>first two bytes identify the controller, and are the same as controller ID</li>
-<li><p>other two bytes identify the sensor/actuator on that controller</p></li>
-<li><strong>ACTION</strong>: the action to be taken. Takes one of the following values:</li>
+<li>other two bytes identify the sensor/actuator on that controller</li>
+</ul></li>
+<li><p><strong>ACTION</strong>: the action to be taken. Takes one of the following values:</p>
+<ul>
 <li><code>ACTION_SET</code>: if <strong>ID</strong> refers to an actuator, set it's value</li>
 <li><code>ACTION_GET</code>: if <strong>ID</strong> refers to a sensor, get the reading from that sensor. Not used if system is configuered in continuous mode.</li>
 <li><code>ACTION_VAL</code>:
 <ul>
 <li>if the system is configured to use a request/response method, it is a response to an <code>ACTION_GET</code> message, containing the requested value.</li>
-<li>if sensors are configured to send data continuously, it is sent continuously by the controller.<br />
-<!-- diff-add --></li>
+<li>if sensors are configured to send data continuously, it is sent continuously by the controller.</li>
 </ul></li>
-<li><code>ACTION_CONF</code>: used for sensor/actuator setup<br />
-<!-- diff-end --></li>
-<li>Other values are reserved for future use<br />
-<!-- diff-del --></li>
-<li><strong>VALUE</strong>: value of the packet. Variable length and format, will never contain <code>'\0'</code>. Missing on <code>ACTION_GET</code> packets. See <a href="#common-value-types">here</a> for recommendations on value formats.<br />
-<!-- diff-end --><br />
-<!-- diff-add --></li>
-<li><strong>VALUE</strong>: value of the packet. Missing on <code>ACTION_GET</code> packets. Can be one of the following formats:</li>
+</ul></li>
+</ul>
+<div class="diff-add">
+
+<ul>
+<li><code>ACTION_CONF</code>: used for sensor/actuator setup</li>
+</ul>
+</div>
+
+<ul>
+<li>Other values are reserved for future use</li>
+</ul>
+<div class="diff-del">
+
+<ul>
+<li><strong>VALUE</strong>: value of the packet. Variable length and format, will never contain <code>'\0'</code>. Missing on <code>ACTION_GET</code> packets. See <a href="#common-value-types">here</a> for recommendations on value formats.</li>
+</ul>
+</div>
+
+<div class="diff-add">
+
+<ul>
+<li><strong>VALUE</strong>: value of the packet. Missing on <code>ACTION_GET</code> packets. Can be one of the following formats:
+<ul>
 <li><code>INTEGER</code>: a signed integer</li>
 <li><code>FLOAT</code>: an IEEE 754 floating point number</li>
 <li><code>BOOL</code>: a type taking one of two values: <code>TRUE</code> and <code>FALSE</code></li>
@@ -122,20 +144,24 @@
 <li><code>TIME</code>: represents a millisecond-accurate timestamp, synced between all controllers and hub</li>
 <li><code>GEOLOCATION</code>: represents a GPS position as a latitude-longitude-elevation triple, in degrees and meters.</li>
 <li><code>MISSING</code>: a missing value</li>
-<li><p><code>VENDOR</code>: vendor specific formats, identified using a two-byte vendor prefix and one-byte format identifier.<br />
-<!-- diff-end --></p></li>
+<li><code>VENDOR</code>: vendor specific formats, identified using a two-byte vendor prefix and one-byte format identifier.</li>
+</ul></li>
 </ul>
+</div>
+
 <p>The exact encoding of the above fields, as well as additional messages are be defined in the <strong>management</strong> layer.</p>
-<h2 id="management-layer">Management layer</h2>
+<h2>Management layer</h2>
 <p>Defines encoding for <strong>function</strong> layer, and any additional management messages. This layer can be changed, resulting in a different communication protocol, without affecting the function layer. Implementations should be made so that it's simple to change the protocol.</p>
 <p>The general message format is following:</p>
 <ul>
 <li>byte 0: Message Type</li>
 <li>bytes 1 .. 4: <em>reserved</em></li>
-<li>byte 5: Flags</li>
+<li>byte 5: Flags
+<ul>
 <li>bit 0 (LSB): Direction flag, set for Hub -&gt; Controller, clear for Controller -&gt; Hub</li>
 <li>bit 1: Encrypted, message is encrypted (see <a href="#authentication">here</a>)</li>
 <li>bit 2 .. 7 (MSB): <em>reserved</em></li>
+</ul></li>
 <li>bytes 6 .. 7: Message Length (in bytes, LSB first) (<code>l</code>)</li>
 <li>bytes 8 .. 8+<code>l</code> : Message Data (varies based on type)</li>
 </ul>
@@ -150,19 +176,27 @@
 <li><code>F0</code>-<code>FE</code>: <em>reserved for two-byte values</em></li>
 <li><code>FF</code>: Nonstandard messages</li>
 </ul>
-<h3 id="function-layer-messages">Function layer messages</h3>
+<h3>Function layer messages</h3>
 <p>Function layer messages are encoded in the following format: (bytes relative to start of Message Data segment)</p>
 <ul>
 <li>bytes 0 .. 3: <strong>ID</strong></li>
-<li>byte 4: <strong>ACTION</strong>, encoded as noted below<br />
-<!-- diff-del --></li>
-<li>bytes 5 ... n-1: <strong>VALUE</strong>, possibly ommited</li>
-<li>byte n: ASCII <code>NUL</code> character (hex <code>00</code>)<br />
-<!-- diff-end --><br />
-<!-- diff-add --></li>
-<li>bytes 5 .. n: <strong>VALUE</strong><br />
-<!-- diff-end --></li>
+<li>byte 4: <strong>ACTION</strong>, encoded as noted below</li>
 </ul>
+<div class="diff-del">
+
+<ul>
+<li>bytes 5 ... n-1: <strong>VALUE</strong>, possibly ommited</li>
+<li>byte n: ASCII <code>NUL</code> character (hex <code>00</code>)</li>
+</ul>
+</div>
+
+<div class="diff-add">
+
+<ul>
+<li>bytes 5 .. n: <strong>VALUE</strong></li>
+</ul>
+</div>
+
 <p>ACTION is encoded as follows:</p>
 <ul>
 <li><code>ACTION_VAL</code>: ASCII character <code>=</code> (hex <code>3D</code>)</li>
@@ -170,10 +204,12 @@
 <li><code>ACTION_GET</code>: ASCII character <code>?</code> (hex <code>3F</code>)</li>
 <li>other characters are reserved for future use</li>
 </ul>
-<div class='diff-add'>
+<div class="diff-add">
+
 <p>Encoding of VALUE varies by type, but follows a general type-length-data format:</p>
 <ul>
-<li>Type is encoded as follows:</li>
+<li>Type is encoded as follows:
+<ul>
 <li><code>INTEGER</code>: <code>01</code></li>
 <li><code>FLOAT</code>: <code>02</code></li>
 <li><code>BOOL</code>: <code>03</code></li>
@@ -186,12 +222,16 @@
 <li><code>VENDOR</code>: <code>FF vv vv xx</code>, where <code>vv vv</code> is the vendor identifier and <code>xx</code> is the format</li>
 <li>Range <code>F0</code> .. <code>FE</code> is reserved for two byte codes. Other values are reserved for furure use.</li>
 <li>Special data type <code>EOC</code> (end of content) is used for terminating indeterminate compound data objects, with type <code>00</code>.</li>
-<li>Length (in bytes) is encoded using one of the following forms:</li>
+</ul></li>
+<li>Length (in bytes) is encoded using one of the following forms:
+<ul>
 <li>The short form consists of a single byte in which bit 7 is 0, and bits 0–6 encode the length (which may be 0) as a number of bytes.</li>
 <li>The long form consists of one initial byte in which bit 7 is 1, and bits 0-6 encode the number of following octets (which may not be 0 or 127). The following octets encode (in little-endian format) the length of data.</li>
 <li>The indeterminate form is used when exact length of data is not known. It consists of a single byte with value <code>80</code>. It can only be used when data type can end itself (see below).</li>
 <li>Value <code>FF</code> is reserved for future use.</li>
-<li>Value encoding depends on the type. <code>length</code> refers to the length of data.</li>
+</ul></li>
+<li>Value encoding depends on the type. <code>length</code> refers to the length of data.
+<ul>
 <li><code>INTEGER</code>: A sequence of <code>length</code> bytes, encoding a signed two's-complement integer (little-endian)</li>
 <li><code>FLOAT</code>: If <code>length</code> is 2, 4, 8, 16 or 32, data is an IEEE Half, Single, Double, Quedruple or Octuple precision floating point number. Other <code>length</code> values are invalid.</li>
 <li><code>BOOL</code>: <code>00</code> represents <code>FALSE</code>. Any other value represents <code>TRUE</code>. <code>length</code> different than 1 is invalid.</li>
@@ -202,12 +242,15 @@
 <li><code>GEOLOCATION</code>: A sequence of three IEEE 754 Singles, representing latitude, longitude and elevation. <code>length</code> must be 12.</li>
 <li><code>MISSING</code>: No data (<code>length</code> must be 0)</li>
 <li>Vendor specific data should be properly defined.</li>
+</ul></li>
 </ul>
 </div>
-<h3 id="errors">Errors</h3>
+
+<h3>Errors</h3>
 <p>Represent errors in the system. The format is following:</p>
 <ul>
-<li>byte 0: urgency, mostly decorative and for logging purposes. Takes the following values</li>
+<li>byte 0: urgency, mostly decorative and for logging purposes. Takes the following values
+<ul>
 <li><code>00</code>: Insignificant, default messages and OKs</li>
 <li><code>01</code>: Info, informational messages</li>
 <li><code>20</code>: Warning, system is functioning, but errors are possible</li>
@@ -215,7 +258,9 @@
 <li><code>60</code>: Fatal, a system component is permanently out-of-order</li>
 <li><code>FF</code>: Catastrophic, a total system failure is imminent</li>
 <li>other values may be used as in-between values, but are discouraged</li>
-<li>byte 1..n: scope</li>
+</ul></li>
+<li>byte 1..n: scope
+<ul>
 <li><code>00</code>: Protocol
 <ul>
 <li>.. <code>00</code>: OK, used as response to successful messages</li>
@@ -252,18 +297,21 @@
 <li>.. <code>FF</code>: Custiom message</li>
 </ul></li>
 <li>other values are reserved</li>
+</ul></li>
 <li>byte n+1..n+m: Message, <code>NUL</code> terminated message string</li>
 </ul>
-<h3 id="pings">Pings</h3>
+<h3>Pings</h3>
 <p>Used for making sure controllers are connected. Should be sent from hub if a controller doesn't respond to requests or doesn't send any data during a specified period.</p>
 <ul>
-<li>byte 0: action</li>
+<li>byte 0: action
+<ul>
 <li><code>00</code>: Ping</li>
 <li><code>01</code>: Pong - reply to Ping</li>
+</ul></li>
 </ul>
-<h3 id="configuration">Configuration</h3>
+<h3>Configuration</h3>
 <p><em>TODO</em>: This will include controller autoconfiguration. The goal is to have controllers programmed with &quot;drivers&quot; for different sensors and actuators, and then have the server configure them with pin numbers and sensor/actuator IDs. Some sensors/actuators provide identification mechanisms, these should be included as well.</p>
-<h3 id="authentication">Authentication</h3>
+<h3>Authentication</h3>
 <p><em>TODO</em>: Messages for authentication of the controller and the hub. The following is a general idea of authentication:</p>
 <ol>
 <li>If the controller has saved WiFi settings, go to step 6.</li>
@@ -275,7 +323,7 @@
 <li>Hub and controller communicate over secure WiFi</li>
 </ol>
 <p>Optionaly, AES can be included, with each message being encrypted as well (if secure WiFi isn't secure enough). Then, keys would be derived from controller's keys, and this layer would be used for key exchange, etc.</p>
-<h3 id="routing">Routing</h3>
+<h3>Routing</h3>
 <p><em>TODO</em>: Used when messages must be relayed over controllers via WiFi or Serial. Controllers are arranged in a tree, rooted at the hub. All communication is directional, with towards hub being &quot;upstream&quot; and away from hub &quot;downstream&quot;.</p>
 <p>Message formats:</p>
 <ul>
@@ -283,7 +331,7 @@
 <li><code>01 ..</code>: Route upstream. Following is the message to be forwarded upstream.</li>
 <li><em>TODO</em>: define configuration messages</li>
 </ul>
-<h3 id="nonstandard-messages">Nonstandard messages</h3>
+<h3>Nonstandard messages</h3>
 <p>Used for nonstandard messages. The message format is following:</p>
 <ul>
 <li>byte 0 .. 3: Prefix length (<code>p</code>)</li>
@@ -291,31 +339,34 @@
 <li>byte 8 .. 8+<code>p</code>-1: Prefix, a Java-style dotted unique identifier specifying the message type</li>
 <li>byte 8+<code>p</code> .. 8+<code>p</code>+<code>d</code>-1: Data, varies</li>
 </ul>
-<h2 id="transport-layer">Transport layer</h2>
+<h2>Transport layer</h2>
 <p>Can use either one of transport protocols:</p>
 <ul>
-<li>UDP broadcast: each command is sent to all controllers by UDP broadcast on port, only the one that can handle the packet processes it</li>
-<li>TCP: each command is sent only to the controller that has the given sensor/actuator, the hub must be configured with correct controller-sensor/actuator pairings</li>
+<li><p>UDP broadcast: each command is sent to all controllers by UDP broadcast on port, only the one that can handle the packet processes it</p></li>
+<li><p>TCP: each command is sent only to the controller that has the given sensor/actuator, the hub must be configured with correct controller-sensor/actuator pairings</p>
+<p><strong>NOTE</strong>: using UDP is unreliable as it has no acknowledgement/resend mechanisms. Using TCP in production is recommended!</p></li>
 </ul>
-<p><strong>NOTE</strong>: using UDP is unreliable as it has no acknowledgement/resend mechanisms. Using TCP in production is recommended!</p>
-<h2 id="common-value-types">Common value types</h2>
+<h2>Common value types</h2>
 <p>This section gives recommendations on common value type encodings</p>
 <ul>
-<li>Boolean (yes/no, on/off, high/low):</li>
+<li>Boolean (yes/no, on/off, high/low):
+<ul>
 <li>&quot;positive&quot; values: ASCII <code>Y</code> (hex <code>59</code>)</li>
 <li>&quot;negative&quot; values: ASCII <code>N</code> (hex <code>4E</code>)</li>
+</ul></li>
 <li>Integer: integer decimal number using ASCII <code>0</code>-<code>9</code> digits (hex <code>30</code>-<code>39</code>) prefixed with ASCII <code>-</code> (hex <code>2D</code>) if value is negative</li>
 <li>Real values: fixed point decimal number as above, with ASCII <code>.</code> as a decimal point (hex <code>2E</code>)</li>
 <li>String values: encoded in UTF-8</li>
 <li>Multiple values: separated with ASCII <code>;</code> (hex <code>3B</code>)</li>
 <li>Missing values: ASCII <code>?</code> (hex <code>3F</code>)</li>
 </ul>
-<h1 id="admin-protocol">ADMIN-PROTOCOL</h1>
+<h1>ADMIN-PROTOCOL</h1>
 <p>Used for configuring and debugging controllers.</p>
 <p>Messages sent as strings over UART, terminated with ASCII <code>;</code> (hex <code>3B</code>). Because of that, any data sent cannot contain a <code>;</code>.</p>
 <p>commands (<code>[...]</code> represent arguments):</p>
 <ul>
-<li>Wireless Commands</li>
+<li>Wireless Commands
+<ul>
 <li><code>WC</code> - Wireless Connect: connect to wireless</li>
 <li><code>WD</code> - Wireless Disconnect: disconnect from wireless</li>
 <li><code>WS[ssid]</code> - Wireless set SSID: set wireless ssid</li>
@@ -327,7 +378,9 @@
 <li><code>WW</code> - Wireless Write: save wireless settings to EEPROM</li>
 <li><code>WU[ip] [port] [data]</code> - Wireless Udp: send data over UDP</li>
 <li><code>WT[ip] [port] [data]</code> - Wireless Tcp: send data over TCP</li>
-<li>Pin commands</li>
+</ul></li>
+<li>Pin commands
+<ul>
 <li><code>PH[pin]</code> - Pin High: set pin to high (ignore software)</li>
 <li><code>PL[pin]</code> - Pin Low: set pin to low (ignore software)</li>
 <li><code>PV[pin] [value]</code> - Pin Value: set pin to value (for PWM)</li>
@@ -343,9 +396,12 @@
 <ul>
 <li><em>response</em>: <code>RD[status]</code> - requested pin status (decimal)</li>
 </ul></li>
-<li>Controller commands</li>
+</ul></li>
+<li>Controller commands
+<ul>
 <li><code>CI</code> - Controller Id: get unique controller ID</li>
 <li><code>CR</code> - Controller Reset: soft reset controller</li>
+</ul></li>
 </ul>
 <p>Each command is followed by one of the following responses:</p>
 <ul>
@@ -354,6 +410,6 @@
 <li><code>RO</code> - Response Ok: when there is no data to return</li>
 <li><code>RN</code> - Response Not implemented: when command is not implemented</li>
 </ul>
-<h1 id="api">API</h1>
+<h1>API</h1>
 </body>
 </html>
