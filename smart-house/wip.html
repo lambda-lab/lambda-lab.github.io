@@ -21,12 +21,42 @@
 <h2>Controllers</h2>
 <p><strong>Controllers</strong> are microcontroller boards that interface with sensors and actuators. The boards must be Arduino-compatible and must have UART connection (for programming and configuration). Each controller has it's 2 byte unique ID.</p>
 <p>Boards must be mounted on <strong>mounting plates</strong> for their model. See <a href="#mounting-plates">mounting plates</a> for details.</p>
+<div class="diff-del">
+
 <p>Boards are connected to the <strong>hub</strong> and communicate over one of:</p>
+</div>
+
+<div class="diff-add">
+
+<p>Boards are connected to the <strong>hub</strong> and communicate over:</p>
+</div>
+
+<div class="diff-del">
+
 <ul>
 <li>WiFi, preferred</li>
+</ul>
+</div>
+
+<div class="diff-add">
+
+<ul>
+<li>WiFi</li>
+</ul>
+</div>
+
+<ul>
 <li>Ethernet</li>
 <li>Serial (separate from the required UART connection)</li>
 </ul>
+<div class="diff-add">
+
+<ul>
+<li>Bluetooth</li>
+<li>Any other communication medium, as long as any message can reliably reach from hub to controller and back.</li>
+</ul>
+</div>
+
 <p>The communication protocol is defined <a href="#fumaprotocol">here</a>.</p>
 <div class="diff-del">
 
@@ -68,12 +98,23 @@
 <h1>SOFTWARE</h1>
 <h2>Controller software</h2>
 <p>Software on the controller has the following functionalities:</p>
+<div class="diff-del">
+
 <ul>
-<li>Listens on the WiFi, Ethernet or serial connection for incoming commands (see <a href="#fumaprotocol">protocols</a>)
+<li>Listens on the WiFi, Ethernet or serial connection for incoming commands (see <a href="#fumaprotocol">protocols</a>)</li>
+</ul>
+</div>
+
+<div class="diff-add">
+
+<ul>
+<li>Listens for incoming commands (see <a href="#fumaprotocol">protocols</a>)</li>
+</ul>
+</div>
+
 <ul>
 <li>Responds to queries from the hub</li>
 <li>Periodically sends status to the hub (if configured to do so)</li>
-</ul></li>
 <li>Communicates with sensors</li>
 <li>Allows configuration and debugging over UART (see <a href="#adminprotocol">here</a>)</li>
 </ul>
@@ -173,6 +214,15 @@
 <li><code>03</code>: Configuration [optional]</li>
 <li><code>04</code>: Authentication [optional]</li>
 <li><code>05</code>: Routing [optional]</li>
+</ul>
+<div class="diff-add">
+
+<ul>
+<li><code>EF</code>: Invalid (used for transport protocol)</li>
+</ul>
+</div>
+
+<ul>
 <li><code>F0</code>-<code>FE</code>: <em>reserved for two-byte values</em></li>
 <li><code>FF</code>: Nonstandard messages</li>
 </ul>
@@ -202,6 +252,15 @@
 <li><code>ACTION_VAL</code>: ASCII character <code>=</code> (hex <code>3D</code>)</li>
 <li><code>ACTION_SET</code>: ASCII character <code>&gt;</code> (hex <code>3E</code>)</li>
 <li><code>ACTION_GET</code>: ASCII character <code>?</code> (hex <code>3F</code>)</li>
+</ul>
+<div class="diff-add">
+
+<ul>
+<li><code>ACTION_CONF</code>: ASCII character <code>@</code> (hex <code>40</code>)</li>
+</ul>
+</div>
+
+<ul>
 <li>other characters are reserved for future use</li>
 </ul>
 <div class="diff-add">
@@ -340,14 +399,43 @@
 <li>byte 8+<code>p</code> .. 8+<code>p</code>+<code>d</code>-1: Data, varies</li>
 </ul>
 <h2>Transport layer</h2>
+<div class="diff-del">
+
 <p>Can use either one of transport protocols:</p>
+</div>
+
+<div class="diff-add">
+
+<p>This layer depends on the transport protocol used for sending the message. It handles link specific defaults (eg. TCP ports), configuration, etc.</p>
+</div>
+
+<div class="diff-del">
+
 <ul>
-<li><p>UDP broadcast: each command is sent to all controllers by UDP broadcast on port, only the one that can handle the packet processes it</p></li>
-<li><p>TCP: each command is sent only to the controller that has the given sensor/actuator, the hub must be configured with correct controller-sensor/actuator pairings</p>
-<p><strong>NOTE</strong>: using UDP is unreliable as it has no acknowledgement/resend mechanisms. Using TCP in production is recommended!</p></li>
+<li>UDP broadcast: each command is sent to all controllers by UDP broadcast on port, only the one that can handle the packet processes it</li>
+<li>TCP: each command is sent only to the controller that has the given sensor/actuator, the hub must be configured with correct controller-sensor/actuator pairings</li>
 </ul>
+</div>
+
+<div class="diff-add">
+
+<p>This layer can specify packet framing and additional messages. Management prefix <code>EF</code> is reserved for transport layer messages, which must be followed by protocol identifier. They do not have a management layer header, only the <code>EF</code> leading byte.</p>
+</div>
+
+<div class="diff-del">
+
+<p><strong>NOTE</strong>: using UDP is unreliable as it has no acknowledgement/resend mechanisms. Using TCP in production is recommended!</p>
 <h2>Common value types</h2>
 <p>This section gives recommendations on common value type encodings</p>
+</div>
+
+<div class="diff-add">
+
+<p>Each transport protocol has the following properties:</p>
+</div>
+
+<div class="diff-del">
+
 <ul>
 <li>Boolean (yes/no, on/off, high/low):
 <ul>
@@ -360,6 +448,120 @@
 <li>Multiple values: separated with ASCII <code>;</code> (hex <code>3B</code>)</li>
 <li>Missing values: ASCII <code>?</code> (hex <code>3F</code>)</li>
 </ul>
+</div>
+
+<div class="diff-add">
+
+<ul>
+<li>Default configuration: the default configuration of the protocol, on which the device must listen for incoming messages, if no other connection can be established/is configured.</li>
+<li>Configuration messages: message formats to establish or manage a new connection of that protocol over an existing one (see <a href="#configuration">configuration</a>, connections).</li>
+<li>Control messages and framing: messages sent on the channel for management (error detection, termination, ...)</li>
+</ul>
+<p>Following transport protocols and their identifiers are defined in this document:</p>
+<ul>
+<li>TCP: <code>00</code>.</li>
+<li>UDP: <code>01</code>.</li>
+<li>Serial: <code>02</code></li>
+<li>Bluetooth: <code>03</code></li>
+<li>Values in range <code>F0</code> ... <code>FE</code> are reserved for two byte identifiers.</li>
+<li>Vendor-specific protocols are supported but undocumented. Use <code>FF xx xx yy</code> as identifier, where <code>xx xx</code> is vendor specific prefix, and <code>yy</code> is protocol ID.</li>
+</ul>
+<h3>TCP</h3>
+<p>Either over WiFi or Ethernet.</p>
+<p>Default configuration:</p>
+<ul>
+<li>If over WiFi, SSID <code>OCONN-xxxxxxxx</code> with <code>xxxxxxxx</code> being some string of characters, no encryption</li>
+<li>IP address recieved over DHCP</li>
+<li>Listening on port 41888 for incomming connections.</li>
+<li>Communication must be encrypted, using controllers device key.</li>
+</ul>
+<p>Configuration messages:</p>
+<ul>
+<li>byte 0: <code>00</code> if over Wifi, <code>01</code> if over Ethernet, other values reserved</li>
+<li>byte 1 .. 1+<code>n</code>: if over WiFi: WiFi configuration data (length <code>n</code>)</li>
+<li>byte 2+<code>n</code> .. 5+<code>n</code>: controller IP address, <code>00 00 00 00</code> to use DHCP</li>
+<li>byte 6+<code>n</code> .. 9+<code>n</code>: IP address to connect to, <code>00 00 00 00</code> to listen</li>
+<li>byte 10+<code>n</code> .. 11+<code>n</code>: port to connect to/listen on</li>
+<li>byte 12+<code>n</code>: bitmask
+<ul>
+<li>bit 0 (LSB): Encrypted, set if connection must be encrypted</li>
+<li>other bits reserved, must be clear</li>
+</ul></li>
+</ul>
+<p>WiFi configuration data:</p>
+<ul>
+<li>byte 1: SSID length (<code>l</code>)</li>
+<li>byte 2 .. 2+<code>l</code>: SSID</li>
+<li>byte 3+<code>l</code>: Passphrase length (<code>k</code>)</li>
+<li>byte 4+<code>l</code> .. 4+<code>l</code>+<code>k</code>: Passphrase</li>
+</ul>
+<p>Control messages and framing: None</p>
+<h3>UDP</h3>
+<p>Either over WiFi or Ethernet.</p>
+<p>Default configuration:</p>
+<ul>
+<li>If over WiFi, SSID <code>OCONN-xxxxxxxx</code> with <code>xxxxxxxx</code> being some string of characters, no encryption.</li>
+<li>IP address recieved over DHCP</li>
+<li>Listening on port 14887 for incomming connections</li>
+<li>Communication must be encrypted, using controllers device key.</li>
+</ul>
+<p>Configuration messages:</p>
+<ul>
+<li>byte 0: <code>00</code> if over Wifi, <code>01</code> if over Ethernet, other values reserved</li>
+<li>byte 1 .. 1+<code>n</code>: if over WiFi: WiFi configuration data (length <code>n</code>)</li>
+<li>byte 2+<code>n</code> .. 5+<code>n</code>: controller IP address, <code>00 00 00 00</code> to use DHCP</li>
+<li>byte 6+<code>n</code> .. 9+<code>n</code>: IP address to send data to</li>
+<li>byte 10+<code>n</code> .. 11+<code>n</code>: port to connect to/listen on</li>
+<li>byte 12+<code>n</code>: bitmask
+<ul>
+<li>bit 0 (LSB): Encrypted, set if connection must be encrypted</li>
+<li>bit 1: Broadcast, set if using UDP broadcast</li>
+</ul></li>
+</ul>
+<p>WiFi configuration data:</p>
+<ul>
+<li>byte 1: SSID length (<code>l</code>)</li>
+<li>byte 2 .. 2+<code>l</code>: SSID</li>
+<li>byte 3+<code>l</code>: Passphrase length (<code>k</code>)</li>
+<li>byte 4+<code>l</code> .. 4+<code>l</code>+<code>k</code>: Passphrase</li>
+</ul>
+<p>Control messages and framing: None</p>
+<h3>Serial</h3>
+<p>Default configuratioin:</p>
+<ul>
+<li>Default TX and RX connection must be labeled on the device</li>
+<li>Baud rate 115200, 8 data bits, no parity, 1 stop bit</li>
+<li>Control enabled</li>
+</ul>
+<p>Configuration messages:</p>
+<ul>
+<li>byte 0 .. 3: baud rate</li>
+<li>byte 4:
+<ul>
+<li>bit 0 (LSB) .. 1: data bits (<code>00</code> for 7, <code>01</code> for 8, <code>10</code> for 9, <code>11</code> reserved)</li>
+<li>bit 2 .. 4: parity (<code>000</code> for no parity, <code>001</code> for odd, <code>010</code> for even, <code>011</code> for mark, <code>100</code> for space)</li>
+<li>bit 5 .. 6: stop bits (<code>00</code> for 1, <code>01</code> for 1.5, <code>10</code> for 2)</li>
+<li>bit 7: control, set to enable</li>
+</ul></li>
+</ul>
+<p>Control messages and framing: only if control is enabled</p>
+<ul>
+<li>Messages are followed by a CRC-32 checksum</li>
+<li>Each message must be followed by an acknowledgement reply (<code>EF 02</code> is the prefix and ID):
+<ul>
+<li><code>EF 02 00</code>, checksum OK</li>
+<li><code>EF 02 FF</code>, checksum failure</li>
+<li>other values are reserved</li>
+</ul></li>
+</ul>
+</div>
+
+<div class="diff-add">
+
+<h3>Bluetooth</h3>
+<p><em>TODO</em>: Bluetooth has a lot of possible configurations, this needs to be further defined to cover most or all of them.</p>
+</div>
+
 <h1>ADMIN-PROTOCOL</h1>
 <p>Used for configuring and debugging controllers.</p>
 <p>Messages sent as strings over UART, terminated with ASCII <code>;</code> (hex <code>3B</code>). Because of that, any data sent cannot contain a <code>;</code>.</p>
